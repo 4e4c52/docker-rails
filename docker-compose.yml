@@ -1,0 +1,43 @@
+---
+version: '3'
+services:
+  assets:
+    build: .
+    command: yarn build --watch
+    env_file:
+      - .env/development/database
+      - .env/development/web
+    stdin_open: true
+    volumes:
+      - .:/usr/src/app
+      - gem_cache:/gems
+  database:
+    env_file:
+      - .env/development/database
+    image: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  redis:
+    image: redis
+  selenium_chrome:
+    environment:
+      - JAVA_OPTS=-Dwebdriver.chrome.whitelistedIps=
+    image: seleniarm/standalone-chromium
+    logging:
+      driver: none
+    ports:
+      - '4444:4444'
+  web:
+    build: .
+    env_file:
+      - .env/development/database
+      - .env/development/web
+    ports:
+      - '3000:3000'
+      - '4000:4000'
+    volumes:
+      - .:/usr/src/app
+      - gem_cache:/gems
+volumes:
+  db_data: null
+  gem_cache: null
